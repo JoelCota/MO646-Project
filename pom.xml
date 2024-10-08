@@ -13,8 +13,8 @@
         <maven.compiler.target>21</maven.compiler.target>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
         <sonar.host.url>http://localhost:9000</sonar.host.url>
-        <sonar.login>your_sonar_login</sonar.login>
-        <sonar.projectKey>your_sonar_project_key</sonar.projectKey>
+        <sonar.login>sqp_f5f290e1c445248b969b73b5bd84c14c6aee5c51</sonar.login>
+        <sonar.projectKey>Atividade4</sonar.projectKey>
         <sonar.projectName>MO646-Activity</sonar.projectName>
         <sonar.sources>src/main/java</sonar.sources>
         <sonar.tests>src/test/java</sonar.tests>
@@ -42,6 +42,32 @@
                 <artifactId>sonar-maven-plugin</artifactId>
                 <version>3.9.0.2155</version>
             </plugin>
+             <plugin>
+            <groupId>org.jacoco</groupId>
+            <artifactId>jacoco-maven-plugin</artifactId>
+            <version>0.8.12</version>
+            <executions>
+                <execution>
+                    <id>prepare-agent</id>
+                    <goals>
+                        <goal>prepare-agent</goal>
+                    </goals>
+                </execution>
+                <execution>
+                    <id>report</id>
+                    <goals>
+                        <goal>report</goal>
+                    </goals>
+                    <configuration>
+                        <reports>
+                            <xml>enabled</xml>
+                            <csv>disabled</csv>
+                            <html>enabled</html>
+                        </reports>
+                    </configuration>
+                </execution>
+            </executions>
+        </plugin>
         </plugins>
     </build>
 
