@@ -158,10 +158,36 @@ class FraudDetectionSystemTest {
 
         FraudCheckResult result = fraudSystem.checkForFraud(currentTransaction, previousTransactions, blacklistedLocations);
 
-        // Verifica que la tarjeta se bloquea por una transacción en una ubicación de la lista negra
         assertTrue(result.isBlocked);
         assertEquals(100, result.riskScore);
     }
 
-    
+    @Test
+    void testTransactionAmountExactlyAtLimit() {    
+    FraudDetectionSystem fraudSystem = new FraudDetectionSystem();
+    Transaction currentTransaction = new Transaction(10000, LocalDateTime.now(), "USA");
+    List<Transaction> previousTransactions = new ArrayList<>();
+    List<String> blacklistedLocations = Arrays.asList("HighRiskCountry");
+
+    FraudCheckResult result = fraudSystem.checkForFraud(currentTransaction, previousTransactions, blacklistedLocations);
+
+    assertFalse(result.isFraudulent);
+    assertFalse(result.verificationRequired);
+}
+
+    @Test
+    void testNoFraudForSameLocationTransactions() {
+        FraudDetectionSystem fraudSystem = new FraudDetectionSystem();
+        Transaction currentTransaction = new Transaction(5000, LocalDateTime.now(), "USA");
+        Transaction previousTransaction = new Transaction(5000, LocalDateTime.now().minusMinutes(10), "USA");
+
+        List<Transaction> previousTransactions = Arrays.asList(previousTransaction);
+        List<String> blacklistedLocations = new ArrayList<>();
+
+        FraudCheckResult result = fraudSystem.checkForFraud(currentTransaction, previousTransactions, blacklistedLocations);
+
+        assertFalse(result.isFraudulent);
+        assertFalse(result.verificationRequired);
+    }
+
 }

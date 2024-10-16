@@ -137,7 +137,7 @@ import static org.junit.jupiter.api.Assertions.*;
          double totalEnergyUsedToday = 6; // Uso total de energía
  
          EnergyManagementResult result = energySystem.manageEnergy(0.15, 0.20, devicePriorities, 
-             LocalDateTime.now().plusHours(6), 21.0, new double[]{20.0, 24.0}, energyUsageLimit, totalEnergyUsedToday, new ArrayList<>());
+             LocalDateTime.now().plusHours(16), 21.0, new double[]{20.0, 24.0}, energyUsageLimit, totalEnergyUsedToday, new ArrayList<>());
  
          // Verifica que los dispositivos de baja prioridad se apagan
          assertTrue(result.deviceStatus.get("Lights"));
@@ -159,7 +159,7 @@ import static org.junit.jupiter.api.Assertions.*;
          double totalEnergyUsedToday = 4; // Uso total de energía
  
          EnergyManagementResult result = energySystem.manageEnergy(0.15, 0.20, devicePriorities, 
-             LocalDateTime.now().plusHours(6), 19.0, new double[]{20.0, 24.0}, energyUsageLimit, totalEnergyUsedToday, new ArrayList<>());
+             LocalDateTime.now().plusHours(16), 19.0, new double[]{20.0, 24.0}, energyUsageLimit, totalEnergyUsedToday, new ArrayList<>());
  
          // Verifica que los dispositivos de baja prioridad se apagan
          assertTrue(result.deviceStatus.get("Lights"));
@@ -191,13 +191,44 @@ import static org.junit.jupiter.api.Assertions.*;
         Map<String, Integer> devicePriorities = new HashMap<>();
         devicePriorities.put("Oven", 1);
 
-        // Programa el dispositivo para activarse a las 18:00
         List<DeviceSchedule> schedules = Arrays.asList(new DeviceSchedule("Oven", LocalDateTime.of(2024, 10, 1, 19, 0)));
 
-        // Simula que el tiempo actual coincide con el tiempo programado
         EnergyManagementResult result = energySystem.manageEnergy(0.15, 0.20, devicePriorities, LocalDateTime.of(2024, 10, 1, 18, 0), 21.0, new double[]{20.0, 24.0}, 50, 30, schedules);
 
-        // Verifica que el dispositivo programado se enciende en el tiempo correcto
         assertTrue(result.deviceStatus.get("Oven"));
     }
+    @Test
+    void testExactTemperatureAtLowerLimit() {
+        SmartEnergyManagementSystem energySystem = new SmartEnergyManagementSystem();
+        Map<String, Integer> devicePriorities = new HashMap<>();
+        devicePriorities.put("Heating", 1);
+
+        EnergyManagementResult result = energySystem.manageEnergy(0.15, 0.20, devicePriorities, LocalDateTime.now(), 20.0, new double[]{20.0, 24.0}, 50, 30, new ArrayList<>());
+
+        assertFalse(result.deviceStatus.get("Heating"));
+        assertFalse(result.temperatureRegulationActive);
+    }
+
+    @Test
+    void testShutdownWhenEnergyLimitReached() {
+        SmartEnergyManagementSystem energySystem = new SmartEnergyManagementSystem();
+        Map<String, Integer> devicePriorities = new HashMap<>();
+        devicePriorities.put("Lights", 2); 
+        devicePriorities.put("Appliances", 3);
+        EnergyManagementResult result = energySystem.manageEnergy(0.15, 0.20, devicePriorities, LocalDateTime.now(), 22.0, new double[]{20.0, 24.0}, 50, 51, new ArrayList<>());
+        assertFalse(result.deviceStatus.get("Lights"));
+        assertFalse(result.deviceStatus.get("Appliances"));
+    }
+    @Test
+    void testEnergySavingModeVoidMethod() {
+        SmartEnergyManagementSystem energySystem = new SmartEnergyManagementSystem();
+        Map<String, Integer> devicePriorities = new HashMap<>();
+        devicePriorities.put("Lights", 2); 
+    
+        EnergyManagementResult result = energySystem.manageEnergy(0.25, 0.20, devicePriorities, LocalDateTime.now(), 21.0, new double[]{20.0, 24.0}, 50, 30, new ArrayList<>());
+        
+        assertTrue(result.energySavingMode);
+        assertFalse(result.deviceStatus.get("Lights")); 
+    }
+    
 }
